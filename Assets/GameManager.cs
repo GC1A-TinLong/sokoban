@@ -123,12 +123,12 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
         {
             var playerPosition = GetPlayerIndex();
-            MoveNumber(playerPosition, playerPosition + Vector2Int.down);
+            MoveNumber(playerPosition, playerPosition - Vector2Int.up);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
             var playerPosition = GetPlayerIndex();
-            MoveNumber(playerPosition, playerPosition + Vector2Int.up);
+            MoveNumber(playerPosition, playerPosition - Vector2Int.down);
         }
     }
 }
