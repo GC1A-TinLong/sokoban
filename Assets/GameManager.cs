@@ -22,7 +22,6 @@ public class GameManager : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
-
         if (field[moveTo.y, moveTo.x]?.tag == "Box")
         {
             var offset = moveTo - moveFrom;
@@ -31,27 +30,11 @@ public class GameManager : MonoBehaviour
             if (!result) { return false; }
         }
 
-
         field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
 
         return true;
-
-        /*if (map[moveTo] == 2)
-        {
-            int offset = moveTo - moveFrom; // î†ÇÃçsêÊÇåàÇﬂÇÈÇΩÇﬂÇÃç∑ï™
-            bool success = MoveNumber(2, moveTo, moveTo + offset);
-
-            if (!success)
-            {
-                return false;
-            }
-        }   // çsêÊÇ…î†Ç™Ç†ÇÈéû
-
-        map[moveTo] = number;
-        map[moveFrom] = 0;
-        return true;*/
     }
 
     Vector2Int GetPlayerIndex()
@@ -124,7 +107,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
     void Update()
     {
 
