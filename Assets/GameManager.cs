@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject clearText;
     public GameObject playerPrefab;
     public GameObject boxPrefab;
+    public GameObject goalPrefab;
     int[,] map;
     GameObject instance;
     GameObject[,] field;
@@ -30,7 +32,10 @@ public class GameManager : MonoBehaviour
             if (!result) { return false; }
         }
 
-        field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
+        GameObject playerOrBox = field[moveFrom.y, moveFrom.x];
+        Move move = playerOrBox.GetComponent<Move>();
+        move.MoveTo(new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0));
+        // Moving field data
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
 
@@ -55,6 +60,28 @@ public class GameManager : MonoBehaviour
         return new Vector2Int(-1, -1);  // player not found
     }
 
+    bool IsCleared()
+    {
+        List<Vector2Int> goals = new List<Vector2Int>();
+
+        for (int y = 0; y < field.GetLength(0); y++)
+        {
+            for (int x = 0; x < field.GetLength(1); x++)
+            {
+                if (map[y, x] == 3)
+                {
+                    goals.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+        foreach (var g in goals)
+        {
+            var go = field[g.y, g.x];
+            if (go == null || go.tag != "Box") { return false; }
+        }
+        return true;
+    }
+
     void PrintArray()
     {
         string debugText = "";
@@ -74,15 +101,17 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        clearText.SetActive(false);
+
         map = new int[,]
         {
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 2, 0, 0, 0 },
+            { 0, 3, 0, 0, 0, 0, 2, 3, 0, 0 },
             { 0, 0, 0, 0, 0, 1, 0, 2, 0, 0 },
             { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0, 2, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
         };
         field = new GameObject
             [
@@ -100,35 +129,42 @@ public class GameManager : MonoBehaviour
                 {
                     field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
-                if (map[y, x] == 2)
+                else if (map[y, x] == 2)
                 {
                     field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
+                else if (map[y, x] == 3)
+                {
+                    field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
             }
         }
     }
     void Update()
     {
-
         if (Input.GetKeyDown(KeyCode.D))
         {
             var playerPosition = GetPlayerIndex();
             MoveNumber(playerPosition, playerPosition + Vector2Int.right); // Vector2Int.right == (1,0)
+            if (IsCleared()) { clearText.SetActive(true); }
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
             var playerPosition = GetPlayerIndex();
             MoveNumber(playerPosition, playerPosition + Vector2Int.left);
+            if (IsCleared()) { clearText.SetActive(true); }
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
             var playerPosition = GetPlayerIndex();
             MoveNumber(playerPosition, playerPosition - Vector2Int.up);
+            if (IsCleared()) { clearText.SetActive(true); }
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
             var playerPosition = GetPlayerIndex();
             MoveNumber(playerPosition, playerPosition - Vector2Int.down);
+            if (IsCleared()) { clearText.SetActive(true); }
         }
     }
 }
