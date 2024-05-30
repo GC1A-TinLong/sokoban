@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class GameManager : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject boxPrefab;
     public GameObject goalPrefab;
+    public GameObject wallPrefab;
     int[,] map;
     GameObject instance;
     GameObject[,] field;
@@ -21,8 +23,8 @@ public class GameManager : MonoBehaviour
     /// <returns>ˆÚ“®‰Â”\‚ÈŽž true</returns>
     bool MoveNumber(Vector2Int moveFrom, Vector2Int moveTo)
     {
-        if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
-        if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
+        if (moveTo.y < 1 || moveTo.y >= field.GetLength(0) - 1) { return false; }
+        if (moveTo.x < 1 || moveTo.x >= field.GetLength(1) - 1) { return false; }
 
         if (field[moveTo.y, moveTo.x]?.tag == "Box")
         {
@@ -42,6 +44,24 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    void ResetScene()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            map = new int[,]
+        {
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 },
+            { 4, 0, 0, 2, 0, 0, 0, 0, 0, 4 },
+            { 4, 3, 0, 0, 0, 0, 2, 3, 0, 4 },
+            { 4, 0, 0, 0, 0, 1, 2, 2, 0, 4 },
+            { 4, 0, 0, 2, 0, 0, 0, 0, 0, 4 },
+            { 4, 0, 0, 0, 0, 0, 0, 2, 0, 4 },
+            { 4, 0, 3, 0, 0, 0, 3, 0, 0, 4 },
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 },
+        };
+        }
+    }
+
     Vector2Int GetPlayerIndex()
     {
         for (int y = 0; y < field.GetLength(0); y++)
@@ -50,7 +70,7 @@ public class GameManager : MonoBehaviour
             {
                 GameObject obj = field[y, x];
 
-                if (obj != null && obj?.tag == "Player")    // variable"?" == xxx (null check)
+                if (obj?.tag == "Player")    // Hoge?.hoge == Hoge (null check)
                 {
                     return new Vector2Int(x, y);
                 }
@@ -105,13 +125,14 @@ public class GameManager : MonoBehaviour
 
         map = new int[,]
         {
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 },
-            { 0, 3, 0, 0, 0, 0, 2, 3, 0, 0 },
-            { 0, 0, 0, 0, 0, 1, 0, 2, 0, 0 },
-            { 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 2, 0, 0 },
-            { 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 },
+            { 4, 0, 0, 2, 0, 0, 0, 0, 0, 4 },
+            { 4, 3, 0, 0, 0, 0, 2, 3, 0, 4 },
+            { 4, 0, 0, 0, 0, 1, 2, 2, 0, 4 },
+            { 4, 0, 0, 2, 0, 0, 0, 0, 0, 4 },
+            { 4, 0, 0, 0, 0, 0, 0, 2, 0, 4 },
+            { 4, 0, 3, 0, 0, 0, 3, 0, 0, 4 },
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 },
         };
         field = new GameObject
             [
@@ -137,21 +158,30 @@ public class GameManager : MonoBehaviour
                 {
                     field[y, x] = Instantiate(goalPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
+                else if (map[y, x] == 4)
+                {
+                    field[y, x] = Instantiate(wallPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
             }
         }
     }
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
         if (Input.GetKeyDown(KeyCode.D))
         {
             var playerPosition = GetPlayerIndex();
-            MoveNumber(playerPosition, playerPosition + Vector2Int.right); // Vector2Int.right == (1,0)
+            MoveNumber(playerPosition, playerPosition + Vector2Int.right);  // Vector2Int.right == (1,0)
             if (IsCleared()) { clearText.SetActive(true); }
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
             var playerPosition = GetPlayerIndex();
-            MoveNumber(playerPosition, playerPosition + Vector2Int.left);
+            MoveNumber(playerPosition, playerPosition + Vector2Int.left);   // Vector2Int.left == (-1.0)
             if (IsCleared()) { clearText.SetActive(true); }
         }
         if (Input.GetKeyDown(KeyCode.W))

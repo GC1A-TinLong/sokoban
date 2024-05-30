@@ -5,7 +5,7 @@ using UnityEngine;
 public class Move : MonoBehaviour
 {
     // seconds before finished moving
-    public float duration = 0.2f;
+    public float duration = 0.4f;
     // seconds after started moving
     float elapsedTime;
     Vector3 destination;
